@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Inscritos - Doacao de Sangue</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <h1>🩸 Doacao de Sangue</h1>
+    <nav>
+      <a href="index.html">Formulario</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="card">
+    <h2>Dias do evento</h2>
+    <p style="color: var(--texto-suave); margin-top: -6px;">
+      Cadastre aqui os dias em que a doacao vai acontecer. Eles aparecerao no formulario de inscricao.
+    </p>
+
+    <form id="form-evento">
+      <div class="grid-form">
+        <div>
+          <label for="data">Data</label>
+          <input type="date" id="data" name="data" required />
+        </div>
+        <div>
+          <label for="descricao">Descricao (opcional)</label>
+          <input type="text" id="descricao" name="descricao" placeholder="Ex: Unidade Centro" />
+        </div>
+      </div>
+      <div class="actions">
+        <button type="submit" class="primary">Adicionar dia</button>
+      </div>
+      <div id="msg-evento" class="msg"></div>
+    </form>
+
+    <div id="lista-eventos" style="margin-top: 18px;"></div>
+  </div>
+
+  <div class="card">
+    <h2>Inscritos</h2>
+    <div id="contagem" class="contagem"></div>
+    <div class="tabela-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Nome</th>
+            <th>Idade</th>
+            <th>Sexo</th>
+            <th>Problema de saude</th>
+            <th>Dia</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="tbody-inscricoes"></tbody>
+      </table>
+      <div id="vazio-inscricoes" class="vazio" style="display: none;">Nenhuma inscricao ainda.</div>
+    </div>
+  </div>
+</main>
+
+<script>
+const formEvento = document.getElementById('form-evento');
+const msgEvento = document.getElementById('msg-evento');
+const listaEventos = document.getElementById('lista-eventos');
+const tbody = document.getElementById('tbody-inscricoes');
+const vazioInscricoes = document.getElementById('vazio-inscricoes');
+const contagem = document.getElementById('contagem');
+
+function formatarData(iso) {
+  const [ano, mes, dia] = iso.split('-');
+  return `${dia}/${mes}/${ano}`;
+}
+
+function formatarDataHora(iso) {
+  const d = new Date(iso);
+  return d.toLocaleString('pt-BR');
+}
+
+async function carregarEventos() {
+  const res = await fetch('/api/eventos');
+  const eventos = await res.json();
+
+  if (!eventos.length) {
+    listaEventos.innerHTML = '<div class="vazio">Nenhum dia cadastrado ainda.</div>';
+    return;
+  }
+
+  listaEventos.innerHTML = eventos
+    .map(
+      (e) => `
+      <div class="linha-evento">
+        <div class="info">
+          <strong>${formatarData(e.data)}</strong>
+          <span>${e.descricao || 'Sem descricao'}</span>
+        </div>
+        <button class="perigo" data-id="${e.id}" data-tipo="evento">Remover</button>
+      </div>`
+    )
+    .join('');
+}
+
+async function carregarInscricoes() {
+  const res = await fetch('/api/inscricoes');
+  const inscricoes = await res.json();
+
+  contagem.textContent = `${inscricoes.length} inscricao(oes)`;
+
+  if (!inscricoes.length) {
+    tbody.innerHTML = '';
+    vazioInscricoes.style.display = 'block';
+    return;
+  }
+
+  vazioInscricoes.style.display = 'none';
+  tbody.innerHTML = inscricoes
+    .map(
+      (i) => `
+      <tr>
+        <td>${i.nome}</td>
+        <td>${i.idade}</td>
+        <td>${i.sexo}</td>
+        <td>
+          <span class="badge ${i.problemaSaude === 'sim' ? 'sim' : 'nao'}">${i.problemaSaude === 'sim' ? 'Sim' : 'Nao'}</span>
+          ${i.problemaSaude === 'sim' && i.detalhesSaude ? `<div style="margin-top:4px; color: var(--texto-suave); font-size:0.82rem;">${i.detalhesSaude}</div>` : ''}
+        </td>
+        <td>${i.evento ? formatarData(i.evento.data) : '<span style="color: var(--texto-suave)">removido</span>'}</td>
+        <td><button class="perigo" data-id="${i.id}" data-tipo="inscricao">Remover</button></td>
+      </tr>`
+    )
+    .join('');
+}
+
+async function carregarTudo() {
+  await Promise.all([carregarEventos(), carregarInscricoes()]);
+}
+
+formEvento.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  msgEvento.className = 'msg';
+
+  const dados = {
+    data: document.getElementById('data').value,
+    descricao: document.getElementById('descricao').value,
+  };
+
+  const res = await fetch('/api/eventos', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(dados),
+  });
+  const resultado = await res.json();
+
+  if (!res.ok) {
+    msgEvento.className = 'msg erro';
+    msgEvento.textContent = resultado.erro || 'Erro ao adicionar dia.';
+    return;
+  }
+
+  msgEvento.className = 'msg sucesso';
+  msgEvento.textContent = 'Dia adicionado!';
+  formEvento.reset();
+  carregarTudo();
+});
+
+document.addEventListener('click', async (e) => {
+  if (e.target.matches('button.perigo')) {
+    const id = e.target.dataset.id;
+    const tipo = e.target.dataset.tipo;
+
+    if (tipo === 'evento' && !confirm('Remover este dia? As inscricoes ligadas a ele nao serao apagadas.')) return;
+    if (tipo === 'inscricao' && !confirm('Remover esta inscricao?')) return;
+
+    const rota = tipo === 'evento' ? `/api/eventos/${id}` : `/api/inscricoes/${id}`;
+    await fetch(rota, { method: 'DELETE' });
+    carregarTudo();
+  }
+});
+
+carregarTudo();
+</script>
+</body>
+</html>

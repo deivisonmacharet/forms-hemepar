@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Inscricao - Doacao de Sangue</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <h1>🩸 Doacao de Sangue</h1>
+    <nav>
+      <a href="respostas.html">Ver inscritos</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="card">
+    <h2>Quero participar</h2>
+    <p style="color: var(--texto-suave); margin-top: -6px;">
+      Preencha seus dados para se inscrever na campanha de doacao de sangue da empresa.
+    </p>
+
+    <form id="form-inscricao">
+      <label for="nome">Nome completo</label>
+      <input type="text" id="nome" name="nome" required />
+
+      <div class="grid-form">
+        <div>
+          <label for="idade">Idade</label>
+          <input type="number" id="idade" name="idade" min="16" max="100" required />
+        </div>
+        <div>
+          <label for="sexo">Sexo</label>
+          <select id="sexo" name="sexo" required>
+            <option value="" disabled selected>Selecione</option>
+            <option value="feminino">Feminino</option>
+            <option value="masculino">Masculino</option>
+            <option value="outro">Outro</option>
+          </select>
+        </div>
+      </div>
+
+      <label>Possui algum problema de saude?</label>
+      <div class="radio-group">
+        <label><input type="radio" name="problemaSaude" value="nao" checked /> Nao</label>
+        <label><input type="radio" name="problemaSaude" value="sim" /> Sim</label>
+      </div>
+
+      <div id="wrap-detalhes" style="display: none;">
+        <label for="detalhesSaude">Descreva o problema de saude</label>
+        <textarea id="detalhesSaude" name="detalhesSaude" placeholder="Ex: pressao alta, anemia, uso de medicamento continuo..."></textarea>
+      </div>
+
+      <label for="eventoId">Dia que vai participar</label>
+      <select id="eventoId" name="eventoId" required>
+        <option value="" disabled selected>Carregando datas...</option>
+      </select>
+
+      <div class="actions">
+        <button type="submit" class="primary">Confirmar inscricao</button>
+      </div>
+
+      <div id="msg" class="msg"></div>
+    </form>
+  </div>
+</main>
+
+<script>
+const form = document.getElementById('form-inscricao');
+const msg = document.getElementById('msg');
+const selectEvento = document.getElementById('eventoId');
+const radiosSaude = document.querySelectorAll('input[name="problemaSaude"]');
+const wrapDetalhes = document.getElementById('wrap-detalhes');
+
+function formatarData(iso) {
+  const [ano, mes, dia] = iso.split('-');
+  return `${dia}/${mes}/${ano}`;
+}
+
+function atualizarDetalhes() {
+  const valor = document.querySelector('input[name="problemaSaude"]:checked').value;
+  wrapDetalhes.style.display = valor === 'sim' ? 'block' : 'none';
+}
+radiosSaude.forEach((r) => r.addEventListener('change', atualizarDetalhes));
+
+async function carregarEventos() {
+  try {
+    const res = await fetch('/api/eventos');
+    const eventos = await res.json();
+
+    if (!eventos.length) {
+      selectEvento.innerHTML = '<option value="" disabled selected>Nenhum dia cadastrado ainda</option>';
+      return;
+    }
+
+    selectEvento.innerHTML =
+      '<option value="" disabled selected>Selecione o dia</option>' +
+      eventos
+        .map(
+          (e) =>
+            `<option value="${e.id}">${formatarData(e.data)}${e.descricao ? ' - ' + e.descricao : ''}</option>`
+        )
+        .join('');
+  } catch (err) {
+    selectEvento.innerHTML = '<option value="" disabled selected>Erro ao carregar datas</option>';
+  }
+}
+
+carregarEventos();
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  msg.className = 'msg';
+  msg.textContent = '';
+
+  const dados = {
+    nome: document.getElementById('nome').value,
+    idade: document.getElementById('idade').value,
+    sexo: document.getElementById('sexo').value,
+    problemaSaude: document.querySelector('input[name="problemaSaude"]:checked').value,
+    detalhesSaude: document.getElementById('detalhesSaude').value,
+    eventoId: selectEvento.value,
+  };
+
+  try {
+    const res = await fetch('/api/inscricoes', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(dados),
+    });
+    const resultado = await res.json();
+
+    if (!res.ok) {
+      msg.className = 'msg erro';
+      msg.textContent = resultado.erro || 'Erro ao enviar inscricao.';
+      return;
+    }
+
+    msg.className = 'msg sucesso';
+    msg.textContent = 'Inscricao confirmada! Obrigado por participar.';
+    form.reset();
+    atualizarDetalhes();
+  } catch (err) {
+    msg.className = 'msg erro';
+    msg.textContent = 'Nao foi possivel conectar ao servidor.';
+  }
+});
+</script>
+</body>
+</html>

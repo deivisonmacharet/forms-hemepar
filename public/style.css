@@ -1,0 +1,269 @@
+:root {
+  --vermelho: #c62828;
+  --vermelho-escuro: #8e1616;
+  --fundo: #f6f5f3;
+  --texto: #262322;
+  --texto-suave: #6b6560;
+  --borda: #ddd7d2;
+  --branco: #ffffff;
+  --sucesso: #2e7d32;
+  --sucesso-fundo: #e8f5e9;
+  --erro: #c62828;
+  --erro-fundo: #fdecea;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+  background: var(--fundo);
+  color: var(--texto);
+}
+
+header {
+  background: var(--vermelho);
+  color: var(--branco);
+  padding: 20px 16px;
+}
+
+header .wrap {
+  max-width: 720px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+header h1 {
+  margin: 0;
+  font-size: 1.3rem;
+}
+
+header nav a {
+  color: var(--branco);
+  text-decoration: none;
+  margin-left: 16px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  font-size: 0.9rem;
+}
+
+header nav a:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+main {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 24px 16px 60px;
+}
+
+.card {
+  background: var(--branco);
+  border: 1px solid var(--borda);
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.card h2 {
+  margin-top: 0;
+  font-size: 1.1rem;
+}
+
+label {
+  display: block;
+  font-weight: 600;
+  margin: 14px 0 6px;
+  font-size: 0.92rem;
+}
+
+input[type="text"],
+input[type="number"],
+input[type="date"],
+select,
+textarea {
+  width: 100%;
+  padding: 9px 10px;
+  border: 1px solid var(--borda);
+  border-radius: 6px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  background: var(--branco);
+  color: var(--texto);
+}
+
+textarea {
+  resize: vertical;
+  min-height: 60px;
+}
+
+.radio-group {
+  display: flex;
+  gap: 18px;
+  margin-top: 4px;
+}
+
+.radio-group label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 500;
+  margin: 0;
+}
+
+.radio-group input {
+  width: auto;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 18px;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+button.primary {
+  background: var(--vermelho);
+  color: var(--branco);
+}
+
+button.primary:hover {
+  background: var(--vermelho-escuro);
+}
+
+button.secondary {
+  background: var(--branco);
+  color: var(--vermelho);
+  border: 1px solid var(--vermelho);
+}
+
+button.perigo {
+  background: var(--erro-fundo);
+  color: var(--erro);
+  border: 1px solid var(--erro);
+  padding: 5px 10px;
+  font-size: 0.82rem;
+}
+
+.actions {
+  margin-top: 18px;
+}
+
+.msg {
+  padding: 10px 12px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  margin-top: 14px;
+  display: none;
+}
+
+.msg.sucesso {
+  display: block;
+  background: var(--sucesso-fundo);
+  color: var(--sucesso);
+  border: 1px solid var(--sucesso);
+}
+
+.msg.erro {
+  display: block;
+  background: var(--erro-fundo);
+  color: var(--erro);
+  border: 1px solid var(--erro);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+
+th, td {
+  text-align: left;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--borda);
+  vertical-align: top;
+}
+
+th {
+  color: var(--texto-suave);
+  font-weight: 600;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+}
+
+.tabela-wrap {
+  overflow-x: auto;
+}
+
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.badge.sim {
+  background: var(--erro-fundo);
+  color: var(--erro);
+}
+
+.badge.nao {
+  background: var(--sucesso-fundo);
+  color: var(--sucesso);
+}
+
+.vazio {
+  color: var(--texto-suave);
+  font-size: 0.9rem;
+  padding: 10px 0;
+}
+
+.linha-evento {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--borda);
+}
+
+.linha-evento:last-child {
+  border-bottom: none;
+}
+
+.linha-evento .info strong {
+  display: block;
+}
+
+.linha-evento .info span {
+  color: var(--texto-suave);
+  font-size: 0.85rem;
+}
+
+.contagem {
+  font-size: 0.85rem;
+  color: var(--texto-suave);
+  margin-bottom: 10px;
+}
+
+.grid-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 14px;
+}
+
+@media (max-width: 480px) {
+  .grid-form {
+    grid-template-columns: 1fr;
+  }
+}

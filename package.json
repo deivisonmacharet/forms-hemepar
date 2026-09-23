@@ -1,0 +1,12 @@
+{
+  "name": "doacao-sangue",
+  "version": "1.0.0",
+  "description": "Sistema simples de inscricao para doacao de sangue",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}
